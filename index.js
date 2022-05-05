@@ -28,6 +28,7 @@ async function main() {
   content.addContext("tracks", tracks);
   const editor = new Editor().setId("editor").mount(content);
   content.addContext("editor", editor);
+  content.switchContext("tracks");
 }
 
 main();

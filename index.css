@@ -1,24 +1,24 @@
 body {
-  color: white;
-  font-family: 'Courier New', Courier, monospace;
-  background-color: black;
+	color: white;
+	font-family: 'Courier New', Courier, monospace;
+	background-color: black;
 }
 
 * {
-  color: inherit;
-  font-family: inherit;
+	color: inherit;
+	font-family: inherit;
 }
 
 .bg-color-darkest {
-  background-color: #201f20;
+	background-color: #201f20;
 }
 
 .bg-color-dark {
-  background-color: #272527;
+	background-color: #272527;
 }
 
 .bg-color {
-  background-color: #312e31;
+	background-color: #312e31;
 }
 
 #title {
@@ -45,15 +45,16 @@ body {
 	border-right-color: black;
 	border-width: 1px;
 	border-style: solid;
-	background-image: linear-gradient(#201f2000,#201f2000,#373746);
+	background-image: linear-gradient(#201f2000, #201f2000, #373746);
 	max-width: calc(99% - 1em);
 	max-height: 2.5em;
 	margin: 1px;
 	border-left-width: 1em;
-  cursor: pointer;
-  background-position: unset unset;
-  transition: all 0.25s;
+	cursor: pointer;
+	background-position: unset unset;
+	transition: all 0.25s;
 }
+
 .track-display:hover {
 	background-image: radial-gradient(ellipse at center, #8c6d93 0%, #201f2000 50%);
 	background-size: 100% 100%;
@@ -64,7 +65,7 @@ body {
 }
 
 .editor {
-  background-color: transparent;
+	background-color: transparent;
 
 }
 

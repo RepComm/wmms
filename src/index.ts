@@ -65,6 +65,7 @@ async function main () {
 
   content.addContext("editor", editor);
 
+  content.switchContext("tracks");
 }
 
 main();
