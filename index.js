@@ -24,9 +24,12 @@ async function main() {
 
   makeContextSwitchButtons("tracks", "editor");
   content.mount(container);
-  const tracks = new Tracks().setId("tracks");
-  content.addContext("tracks", tracks);
   const editor = new Editor().setId("editor").mount(content);
+  const tracks = new Tracks().setId("tracks").onTrackEvent(evt => {
+    editor.setTrackId(evt.trackId);
+    content.switchContext("editor");
+  });
+  content.addContext("tracks", tracks);
   content.addContext("editor", editor);
   content.switchContext("tracks");
 }

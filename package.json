@@ -29,6 +29,7 @@
     "build": "babel src --extensions .ts --copy-files -d ."
   },
   "dependencies": {
-    "@repcomm/exponent-ts": "^1.1.9"
+    "@repcomm/exponent-ts": "^1.1.9",
+    "@repcomm/gameinput-ts": "^1.10.4"
   }
 }

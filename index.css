@@ -53,6 +53,7 @@ body {
 	cursor: pointer;
 	background-position: unset unset;
 	transition: all 0.25s;
+	overflow: hidden;
 }
 
 .track-display:hover {
@@ -61,7 +62,10 @@ body {
 	background-repeat: no-repeat;
 	border-top-color: #b2cef3;
 	border-left-color: #d099f5;
-
+	transition: all 0s;
+}
+.track-display-image {
+	background-repeat: no-repeat;
 }
 
 .editor {

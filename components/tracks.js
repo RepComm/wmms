@@ -1,6 +1,7 @@
 import { Panel } from "@repcomm/exponent-ts";
 import { imgmkr } from "../utils/imgmkr.js";
-import { lerp, inverseLerp, random } from "../utils/math.js";
+import { random } from "../utils/math.js";
+import { trackRender } from "./trackrender.js";
 export function trackOptimise(t) {
   //sort commands by time
   t.maxNote = 0;
@@ -39,7 +40,8 @@ export const TrackManager = {
       maxNote: 0,
       minNote: 0,
       maxTime: 0,
-      minTime: 0
+      minTime: 0,
+      noteColor: random.rgb(128)
     };
     let index = TrackManager.tracks.length;
     TrackManager.tracks.push(result);
@@ -54,10 +56,19 @@ export const TrackManager = {
 export class TrackDisplay extends Panel {
   constructor() {
     super();
-    this.noteColor = random.rgb(128);
-    console.log(this.noteColor);
+    this.trackRenderConfig = {
+      ctx: undefined,
+      h: 0,
+      hScrollMax: 0,
+      hScrollMin: 0,
+      t: undefined,
+      timeScrollMax: 0,
+      timeScrollMin: 0,
+      w: 0
+    };
+    this.trackRenderImage = new Panel().addClasses("track-display-image").mount(this);
     this.addClasses("track-display");
-    this.track = 0;
+    this.trackId = 0;
     this.on("mousemove", e => {
       let evt = e;
       this.setStyleItem("background-position-x", `${evt.clientX - this.rect.width / 2}px`);
@@ -68,54 +79,31 @@ export class TrackDisplay extends Panel {
       this.setStyleItem("background-position-y", "unset");
     });
 
-    this.renderPerform = (ctx, w, h) => {
-      let t = TrackManager.getTrack(this.track);
-      ctx.beginPath();
-      let startX;
-      let startY;
-      let endX;
-      let endY;
-      let noteEnd;
+    this.trackRenderPass = ctx => {
+      if (!this.trackRenderConfig.ctx) this.trackRenderConfig.ctx = ctx;
+      if (!this.trackRenderConfig.t) this.trackRenderConfig.t = TrackManager.getTrack(this.trackId);
+      if (!this.trackRenderConfig.t) return; //cannot render without track
 
-      for (let cmd of t.cmds) {
-        startX = lerp(0, w, inverseLerp(t.minTime, t.maxTime, cmd.timeStart));
-        startY = lerp(0, h, inverseLerp(t.minNote, t.maxNote, cmd.noteStart));
-        endX = lerp(0, w, inverseLerp(t.minTime, t.maxTime, cmd.timeEnd));
-
-        if (cmd.noteEnd === undefined) {
-          noteEnd = cmd.noteStart;
-        } else {
-          noteEnd = cmd.noteEnd;
-        }
-
-        endY = lerp(0, h, inverseLerp(t.minNote, t.maxNote, noteEnd));
-        ctx.moveTo(startX, startY); //TODO: use easing function of note if present to draw curve (current not impl)
-
-        ctx.lineTo(endX, endY);
-      }
-
-      ctx.closePath();
-      ctx.strokeStyle = this.noteColor;
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      trackRender(this.trackRenderConfig);
     };
   }
 
   render() {
-    if (!TrackManager.hasTrack(this.track)) return;
+    if (!TrackManager.hasTrack(this.trackId)) return;
     let r = this.rect;
-    let w = Math.floor(r.width);
-    let h = Math.floor(r.height);
-    let dataUrl = imgmkr(w, h, this.renderPerform);
-    this.setStyleItem("background-image", `url(${dataUrl})`);
-    console.log(dataUrl);
+    this.trackRenderConfig.w = Math.floor(r.width);
+    this.trackRenderConfig.h = Math.floor(r.height);
+    let dataUrl = imgmkr(this.trackRenderConfig.w, this.trackRenderConfig.h, this.trackRenderPass);
+    this.trackRenderImage.setStyleItem("background-image", `url(${dataUrl})`); // console.log(dataUrl);
   }
 
 }
 export class Tracks extends Panel {
   constructor() {
     super();
+    this.listeners = new Set();
     this.addClasses("tracks");
+    this.trackDisplays = new Set();
 
     for (let i = 0; i < 10; i++) {
       let trackId = TrackManager.createTrack();
@@ -134,12 +122,36 @@ export class Tracks extends Panel {
       }
 
       trackOptimise(track);
-      let trackDisplay = new TrackDisplay().mount(this);
-      trackDisplay.track = trackId;
-      setTimeout(() => {
-        trackDisplay.render();
-      }, 10000);
+      let trackDisplay = new TrackDisplay().on("click", evt => {
+        this.fireTrackEvent({
+          trackId
+        });
+      }).mount(this);
+      this.trackDisplays.add(trackDisplay);
+      trackDisplay.trackId = trackId;
     }
+  }
+
+  fireTrackEvent(evt) {
+    for (let listener of this.listeners) {
+      listener(evt);
+    }
+
+    return this;
+  }
+
+  onTrackEvent(listener) {
+    this.listeners.add(listener);
+    return this;
+  }
+
+  mount(parent) {
+    setTimeout(() => {
+      for (let d of this.trackDisplays) {
+        d.render();
+      }
+    }, 10);
+    return super.mount(parent);
   }
 
 }
